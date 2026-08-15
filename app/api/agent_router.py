@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from typing import Annotated
 
+from fastapi import APIRouter, Depends
+
+from app.core.dependencies import get_agent_service
 from app.schemas.agent import AgentRequest, AgentResponse
 from app.services.agent_service import AgentService
 
@@ -13,8 +16,11 @@ agent_service = AgentService()
 @router.post("/run", 
     response_model=AgentResponse
 )
-
-def run_agent(request: AgentRequest)-> AgentResponse:
+def run_agent(request: AgentRequest,
+               agent_service: Annotated[
+                    AgentService,
+                    Depends(get_agent_service)
+            ])-> AgentResponse:
 
     response = agent_service.run(request.message)
 
