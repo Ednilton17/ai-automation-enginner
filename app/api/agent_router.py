@@ -16,13 +16,13 @@ agent_service = AgentService()
 @router.post("/run", 
     response_model=AgentResponse
 )
-def run_agent(request: AgentRequest,
+async def run_agent(request: AgentRequest,
                agent_service: Annotated[
                     AgentService,
                     Depends(get_agent_service)
             ])-> AgentResponse:
 
-    response = agent_service.run(request.message)
+    response = await agent_service.run(request.message)
 
     return AgentResponse(
         response=response
