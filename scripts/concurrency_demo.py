@@ -41,4 +41,5 @@ async def main():
         f"\nTotal execution time: {elapsed:.2f} seconds"
     )
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
