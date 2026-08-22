@@ -1,50 +1,44 @@
-from fastapi.testclient import TestClient
-
-from httpx import ASGITransport, AsyncClient
-from app.main import app
-
 import pytest
+from httpx import AsyncClient
 
-client = TestClient(app)
-
-def test_health_should_return_200():
-    response = client.get("/health")    
-    assert response.status_code == 200
-
-    body = response.json()
-
-    assert body["status"]== "UP"
-    assert "environment" in body
 
 @pytest.mark.anyio
-async def test_health_should_return_up():
+async def test_health_should_return_up(
+    client: AsyncClient
+):
 
-    transport = ASGITransport(app=app)
-
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as client:
-
-        response = await client.get("/health")
+    response = await client.get("/health")
 
     assert response.status_code == 200
+
     body = response.json()
+
     assert body["status"] == "UP"
     assert body["environment"] == "development"
 
 @pytest.mark.anyio
-async def test_unknown_route_should_return_404():
+async def test_health_should_have_expected_fields(
+    client: AsyncClient
+):
 
-    transport = ASGITransport(app=app)
+    response = await client.get("/health")
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as client:
+    body = response.json()
 
-        response = await client.get(
-            "/route-that-does-not-exist"
-        )
+    assert "status" in body
+    assert "environment" in body
+
+@pytest.mark.anyio
+async def test_unknown_endpoint_should_return_404(
+    client: AsyncClient
+):
+
+    response = await client.get(
+        "/endpoint-that-does-not-exist"
+    )
 
     assert response.status_code == 404
+
+    body = response.json()
+
+    assert body["detail"] == "Not Found"
